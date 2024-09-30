@@ -60,3 +60,39 @@ func calculate(p1, p2 structs_and_constants.Point) float64 {
 			return structs_and_constants.Idle_fare * dTime
 	}
 }
+
+func Process(ch chan structs_and_constants.Point) {
+	ch2 := make(chan structs_and_constants.Output_data)
+	// go output(ch2)
+	defer close(ch2)
+
+	p1 := structs_and_constants.Point{}
+	ot := structs_and_constants.Output_data{}
+	
+	for p2 := range ch {
+		if p1.Id_delivery != p2.Id_delivery {
+			if structs_and_constants.Minimum_fare > ot.Fare_estimate {
+				ot.Fare_estimate = structs_and_constants.Minimum_fare
+			}
+			if p1.Id_delivery != 0 {
+				ch2 <- ot
+			}
+
+
+			ot.Id_delivery = p2.Id_delivery
+			ot.Fare_estimate = structs_and_constants.Starting_fare
+			p1 = p2
+		} else {
+			cost := calculate(p1, p2)
+			if cost != -1 {
+				ot.Fare_estimate += cost
+				p1 = p2
+			}
+		}
+	}
+}
+
+func output(ch chan structs_and_constants.Output_data) {
+	//for v := range ch {
+	//} 
+}
