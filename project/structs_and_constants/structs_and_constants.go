@@ -8,13 +8,13 @@ const (
 
 
 type Point struct {
-    id_delivery int64
-    lat float64
-    lng float64
-    timestamp int64
+    Id_delivery int64
+    Lat float64
+    Lng float64
+    Timestamp int64
 }
 
 type Output_data struct {
-    id_delivery int64
-    fare_estimate float64
+    Id_delivery int64
+    Fare_estimate float64
 }
