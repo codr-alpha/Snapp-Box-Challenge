@@ -10,40 +10,59 @@ import (
 	"sync"
 )
 
-func strToFloat64(s string) float64 {
+func strToFloat64(s string) (float64, error) {
 	floatValue, err := strconv.ParseFloat(s, 64)
 	if err != nil {
-		panic(err) // no panic
+		return 0, err
 	}
 
-	return floatValue
+	return floatValue, nil
 }
 
-func strToInt64(s string) int64 {
+func strToInt64(s string) (int64, error) {
 	intValue, err := strconv.ParseInt(s, 10, 64)
 	if err != nil {
-		panic(err) // no panic
+		return 0, err
 	}
 
-	return intValue
+	return intValue, nil
 }
 
-func toPoint(s []string) structs_and_constants.Point {
+func toPoint(s []string) (structs_and_constants.Point, error) {
+	err := make([]error, 4)
+	var id_delivery int64
+	var lat, lng, timestamp float64
+	id_delivery, err[0] = strToInt64(s[0])
+	lat, err[1] = strToFloat64(s[1])
+	lng, err[2] = strToFloat64(s[2])
+	timestamp, err[3] = strToFloat64(s[3])
+	for _, v := range err {
+		if v != nil {
+			return structs_and_constants.Point{}, v
+		}
+	}
 	return structs_and_constants.Point{
-					Id_delivery: strToInt64(s[0]),
-					Lat: strToFloat64(s[1]),
-					Lng: strToFloat64(s[2]),
-					Timestamp: strToFloat64(s[3]),
-				}
+					Id_delivery: id_delivery,
+					Lat: lat,
+					Lng: lng,
+					Timestamp: timestamp,
+				}, nil
 }
 
 func main() {
 	file, err := os.Open("../../input/sample_data.csv")
 	if err != nil {
-		panic(err)
+		fmt.Println("Can not open file!!!")
 		return
 	}
 	defer file.Close()
+
+	reader := csv.NewReader(file)
+
+	if _, err := reader.Read(); err != nil && err.Error() != "EOF" {
+		fmt.Println("Can not read file!!!")
+		return
+	}
 
 	var wg sync.WaitGroup
 	wg.Add(1)
@@ -51,22 +70,23 @@ func main() {
 	ch := make(chan structs_and_constants.Point, structs_and_constants.Buffer_size)
 	go calculations.Process(ch, &wg)
 
-	reader := csv.NewReader(file)
-
-	if _, err := reader.Read(); err != nil && err.Error() != "EOF" {
-		panic(err)
-	}
-
 	for {
 		record, err := reader.Read()
 		if err != nil && err.Error() != "EOF" {
-			panic(err)
-			break
+			fmt.Println("Can not read file!!!")
+			close(ch)
+			return
 		}
 		if len(record) == 0 {
 			break
 		}
-		ch <- toPoint(record)
+		p, e := toPoint(record)
+		if e != nil {
+			fmt.Println(e)
+			close(ch)
+			return
+		}
+		ch <- p
 	}
 	close(ch)
 
