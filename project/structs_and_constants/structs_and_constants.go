@@ -1,5 +1,6 @@
 package structs_and_constants
 
+import "fmt"
 
 const (
     Buffer_size             =       1000 * 1000
@@ -24,4 +25,11 @@ type Point struct {
 type Output_data struct {
     Id_delivery int64
     Fare_estimate float64
+}
+
+func (ot Output_data)ToSlice() []string {
+    rt := make([]string, 2)
+    rt[0] = fmt.Sprintf("%d", ot.Id_delivery)
+    rt[1] = fmt.Sprintf("%f", ot.Fare_estimate)
+    return rt
 }

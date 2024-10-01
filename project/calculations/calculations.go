@@ -4,6 +4,8 @@ import (
 	"my_mod/project/structs_and_constants"
 	"math"
 	"time"
+	"encoding/csv"
+	"os"
 )
 
 func haversine(p1, p2 structs_and_constants.Point) float64 {
@@ -63,12 +65,12 @@ func calculate(p1, p2 structs_and_constants.Point) float64 {
 
 func Process(ch chan structs_and_constants.Point) {
 	ch2 := make(chan structs_and_constants.Output_data)
-	// go output(ch2)
+	go writingToCSV(ch2)
 	defer close(ch2)
 
 	p1 := structs_and_constants.Point{}
 	ot := structs_and_constants.Output_data{}
-	
+
 	for p2 := range ch {
 		if p1.Id_delivery != p2.Id_delivery {
 			if structs_and_constants.Minimum_fare > ot.Fare_estimate {
@@ -92,7 +94,27 @@ func Process(ch chan structs_and_constants.Point) {
 	}
 }
 
-func output(ch chan structs_and_constants.Output_data) {
-	//for v := range ch {
-	//} 
+func writingToCSV(ch chan structs_and_constants.Output_data) {
+	file, err := os.Create("my_mod/output/output.csv")
+	if err != nil {
+		panic(err)
+		return
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	head := []string{"id_delivery", "fare_estimate"}
+	if err := writer.Write(head); err != nil {
+		panic(err)
+		return
+	}
+
+	for v := range ch {
+		if err := writer.Write(v.ToSlice()); err != nil {
+			panic(err)
+			return
+		}
+	}
 }
