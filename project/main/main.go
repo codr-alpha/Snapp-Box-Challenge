@@ -15,7 +15,6 @@ func strToFloat64(s string) (float64, error) {
 	if err != nil {
 		return 0, err
 	}
-
 	return floatValue, nil
 }
 
@@ -24,7 +23,6 @@ func strToInt64(s string) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
-
 	return intValue, nil
 }
 
@@ -36,9 +34,9 @@ func toPoint(s []string) (structs_and_constants.Point, error) {
 	lat, err[1] = strToFloat64(s[1])
 	lng, err[2] = strToFloat64(s[2])
 	timestamp, err[3] = strToFloat64(s[3])
-	for _, v := range err {
-		if v != nil {
-			return structs_and_constants.Point{}, v
+	for _, e := range err {
+		if e != nil {
+			return structs_and_constants.Point{}, e
 		}
 	}
 	return structs_and_constants.Point{
@@ -57,7 +55,6 @@ func main() {
 		return
 	}
 	defer file.Close()
-
 	reader := csv.NewReader(file)
 
 	if _, err := reader.Read(); err != nil && err.Error() != "EOF" {
@@ -68,7 +65,6 @@ func main() {
 
 	var wg sync.WaitGroup
 	wg.Add(1)
-
 	done := make(chan struct{})
 	ch := make(chan structs_and_constants.Point, structs_and_constants.Buffer_size)
 	go calculations.Process(ch, &wg, done)
@@ -101,5 +97,5 @@ func main() {
 
 	wg.Wait()
 
-	fmt.Println("successfully done!!!")
+	fmt.Println("Successfully done!!!")
 }

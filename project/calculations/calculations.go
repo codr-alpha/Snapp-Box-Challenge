@@ -30,7 +30,6 @@ func velocity(dTime, dDistance float64) float64 {
 	if (dTime <= 0) {
 		return 100 + 1
 	}
-
 	return dDistance * (60 * 60) / dTime // km/h
 }
 
