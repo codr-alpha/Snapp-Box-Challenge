@@ -40,7 +40,7 @@ func isBefore5am(t time.Time) bool {
 	minute := t.Minute()
 	second := t.Second()
 
-	v := (hour * 60 * 60 + minute * 60 + second) // fixing isBefore5am bug
+	v := (hour * 60 * 60 + minute * 60 + second)
 
 	return v <= 5 * 60 * 60 && v > 0
 }
@@ -68,7 +68,7 @@ func calculate(p1, p2 structs_and_constants.Point) float64 {
 }
 
 func Process(ch chan structs_and_constants.Point, _wg *sync.WaitGroup, done chan struct{}) {
-	defer _wg.Done() //_wg or not?
+	defer _wg.Done()
 	var wg sync.WaitGroup
 	wg.Add(1)
 	done2 := make(chan struct{})
