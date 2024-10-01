@@ -53,6 +53,7 @@ func main() {
 	file, err := os.Open("../../input/sample_data.csv")
 	if err != nil {
 		fmt.Println("Can not open file!!!")
+		fmt.Println(err)
 		return
 	}
 	defer file.Close()
@@ -61,32 +62,40 @@ func main() {
 
 	if _, err := reader.Read(); err != nil && err.Error() != "EOF" {
 		fmt.Println("Can not read file!!!")
+		fmt.Println(err)
 		return
 	}
 
 	var wg sync.WaitGroup
 	wg.Add(1)
 
+	done := make(chan struct{})
 	ch := make(chan structs_and_constants.Point, structs_and_constants.Buffer_size)
-	go calculations.Process(ch, &wg)
+	go calculations.Process(ch, &wg, done)
 
 	for {
 		record, err := reader.Read()
 		if err != nil && err.Error() != "EOF" {
 			fmt.Println("Can not read file!!!")
+			fmt.Println(err)
 			close(ch)
 			return
 		}
 		if len(record) == 0 {
 			break
 		}
-		p, e := toPoint(record)
-		if e != nil {
-			fmt.Println(e)
-			close(ch)
-			return
+		select {
+			case <-done:
+				return
+			default:
+				p, e := toPoint(record)
+				if e != nil {
+					fmt.Println(e)
+					close(ch)
+					return
+				}
+				ch <- p
 		}
-		ch <- p
 	}
 	close(ch)
 

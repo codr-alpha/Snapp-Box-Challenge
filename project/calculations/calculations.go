@@ -7,6 +7,7 @@ import (
 	"encoding/csv"
 	"os"
 	"sync"
+	"fmt"
 )
 
 func haversine(p1, p2 structs_and_constants.Point) float64 {
@@ -66,13 +67,14 @@ func calculate(p1, p2 structs_and_constants.Point) float64 {
 	}
 }
 
-func Process(ch chan structs_and_constants.Point, _wg *sync.WaitGroup) {
+func Process(ch chan structs_and_constants.Point, _wg *sync.WaitGroup, done chan struct{}) {
 	defer _wg.Done() //_wg or not?
 	var wg sync.WaitGroup
 	wg.Add(1)
+	done2 := make(chan struct{})
 
 	ch2 := make(chan structs_and_constants.Output_data, structs_and_constants.Buffer_size)
-	go writingToCSV(ch2, &wg)
+	go writingToCSV(ch2, &wg, done2)
 
 	p1 := structs_and_constants.Point{}
 	ot := structs_and_constants.Output_data{}
@@ -83,7 +85,13 @@ func Process(ch chan structs_and_constants.Point, _wg *sync.WaitGroup) {
 				ot.Fare_estimate = structs_and_constants.Minimum_fare
 			}
 			if p1.Id_delivery != 0 {
-				ch2 <- ot
+				select {
+					case <-done2:
+						close(done)
+						return
+					default:
+						ch2 <- ot
+				}
 			}
 
 
@@ -108,13 +116,16 @@ func Process(ch chan structs_and_constants.Point, _wg *sync.WaitGroup) {
 	close(ch2)
 
 	wg.Wait()
+	close(done)
 }
 
-func writingToCSV(ch chan structs_and_constants.Output_data, _wg *sync.WaitGroup) {
+func writingToCSV(ch chan structs_and_constants.Output_data, _wg *sync.WaitGroup, done chan struct{}) {
 	defer _wg.Done()
 	file, err := os.Create("../../output/output.csv")
 	if err != nil {
-		panic(err) // no panic
+		fmt.Println("Can not create output file!!!")
+		fmt.Println(err)
+		close(done)
 		return
 	}
 	defer file.Close()
@@ -124,14 +135,19 @@ func writingToCSV(ch chan structs_and_constants.Output_data, _wg *sync.WaitGroup
 
 	head := []string{"id_delivery", "fare_estimate"}
 	if err := writer.Write(head); err != nil {
-		panic(err) // no panic
+		fmt.Println("Can not write to file!!!")
+		fmt.Println(err)
+		close(done)
 		return
 	}
 
 	for v := range ch {
 		if err := writer.Write(v.ToSlice()); err != nil {
-			panic(err) // no panic
+			fmt.Println("Can not write to file!!!")
+			fmt.Println(err)
+			close(done)
 			return
 		}
 	}
+	close(done)
 }
