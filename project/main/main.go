@@ -13,7 +13,7 @@ import (
 func strToFloat64(s string) float64 {
 	floatValue, err := strconv.ParseFloat(s, 64)
 	if err != nil {
-		panic(err)
+		panic(err) // no panic
 	}
 
 	return floatValue
@@ -22,7 +22,7 @@ func strToFloat64(s string) float64 {
 func strToInt64(s string) int64 {
 	intValue, err := strconv.ParseInt(s, 10, 64)
 	if err != nil {
-		panic(err)
+		panic(err) // no panic
 	}
 
 	return intValue
@@ -48,7 +48,7 @@ func main() {
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	ch := make(chan structs_and_constants.Point)
+	ch := make(chan structs_and_constants.Point, structs_and_constants.Buffer_size)
 	go calculations.Process(ch, &wg)
 
 	reader := csv.NewReader(file)

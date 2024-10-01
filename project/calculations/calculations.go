@@ -39,7 +39,9 @@ func isBefore5am(t time.Time) bool {
 	minute := t.Minute()
 	second := t.Second()
 
-	return (hour * 60 * 60 + minute * 60 + second) <= 5 * 60 * 60 
+	v := (hour * 60 * 60 + minute * 60 + second) // fixing isBefore5am bug
+
+	return v <= 5 * 60 * 60 && v > 0
 }
 
 func calculate(p1, p2 structs_and_constants.Point) float64 {
@@ -47,7 +49,7 @@ func calculate(p1, p2 structs_and_constants.Point) float64 {
 	dDistance := haversine(p1, p2) // killometer
 	velocity := velocity(dTime, dDistance) // km/h
 
-	switch{
+	switch {
 		case velocity > 100:
 			return -1
 		case velocity > 10:
@@ -65,11 +67,11 @@ func calculate(p1, p2 structs_and_constants.Point) float64 {
 }
 
 func Process(ch chan structs_and_constants.Point, _wg *sync.WaitGroup) {
-	defer _wg.Done()
+	defer _wg.Done() //_wg or not?
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	ch2 := make(chan structs_and_constants.Output_data)
+	ch2 := make(chan structs_and_constants.Output_data, structs_and_constants.Buffer_size)
 	go writingToCSV(ch2, &wg)
 
 	p1 := structs_and_constants.Point{}
@@ -112,7 +114,7 @@ func writingToCSV(ch chan structs_and_constants.Output_data, _wg *sync.WaitGroup
 	defer _wg.Done()
 	file, err := os.Create("../../output/output.csv")
 	if err != nil {
-		panic(err)
+		panic(err) // no panic
 		return
 	}
 	defer file.Close()
@@ -122,13 +124,13 @@ func writingToCSV(ch chan structs_and_constants.Output_data, _wg *sync.WaitGroup
 
 	head := []string{"id_delivery", "fare_estimate"}
 	if err := writer.Write(head); err != nil {
-		panic(err)
+		panic(err) // no panic
 		return
 	}
 
 	for v := range ch {
 		if err := writer.Write(v.ToSlice()); err != nil {
-			panic(err)
+			panic(err) // no panic
 			return
 		}
 	}
