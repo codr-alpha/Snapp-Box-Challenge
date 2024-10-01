@@ -6,6 +6,7 @@ import (
 	"time"
 	"encoding/csv"
 	"os"
+	"sync"
 )
 
 func haversine(p1, p2 structs_and_constants.Point) float64 {
@@ -59,14 +60,17 @@ func calculate(p1, p2 structs_and_constants.Point) float64 {
 				return structs_and_constants.Moving_after5_fare * dDistance
 			}
 		default:
-			return structs_and_constants.Idle_fare * dTime
+			return structs_and_constants.Idle_fare * dTime / (60 * 60)
 	}
 }
 
-func Process(ch chan structs_and_constants.Point) {
+func Process(ch chan structs_and_constants.Point, _wg *sync.WaitGroup) {
+	defer _wg.Done()
+	var wg sync.WaitGroup
+	wg.Add(1)
+
 	ch2 := make(chan structs_and_constants.Output_data)
-	go writingToCSV(ch2)
-	defer close(ch2)
+	go writingToCSV(ch2, &wg)
 
 	p1 := structs_and_constants.Point{}
 	ot := structs_and_constants.Output_data{}
@@ -92,10 +96,21 @@ func Process(ch chan structs_and_constants.Point) {
 			}
 		}
 	}
+
+	if structs_and_constants.Minimum_fare > ot.Fare_estimate {
+		ot.Fare_estimate = structs_and_constants.Minimum_fare
+	}
+	if p1.Id_delivery != 0 {
+		ch2 <- ot
+	}
+	close(ch2)
+
+	wg.Wait()
 }
 
-func writingToCSV(ch chan structs_and_constants.Output_data) {
-	file, err := os.Create("my_mod/output/output.csv")
+func writingToCSV(ch chan structs_and_constants.Output_data, _wg *sync.WaitGroup) {
+	defer _wg.Done()
+	file, err := os.Create("../../output/output.csv")
 	if err != nil {
 		panic(err)
 		return
