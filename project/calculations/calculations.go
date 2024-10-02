@@ -30,14 +30,14 @@ func haversine(p1, p2 structs_and_constants.Point) float64 {
 	c := 2 * math.Atan2(math.Sqrt(a), math.Sqrt(1-a))
 
 	return structs_and_constants.R_earth * c
-}
+} // test with unit tests in calculations_test.go
 
 func velocity(dTime, dDistance float64) float64 {
 	if (dTime <= 0) {
 		return 100 + 1
 	}
 	return dDistance * hourToSecond / dTime // km/h
-}
+} // test with unit tests in calculations_test.go
 
 // isBefore5am checks if a time.Time is between (00:00, 05:00] or not
 // it calculates how many seconds we are after 00:00 and checks if it is bigger than 0 and not bigger that (05:00)
@@ -49,7 +49,7 @@ func isBefore5am(t time.Time) bool {
 	v := (hour * hourToSecond + minute * minuteToSecond + second)
 
 	return v <= 5 * hourToSecond && v > 0
-}
+} // test with unit tests in calculations_test.go
 
 // calculateFare gets 2 Point and calculate its Fare
 // if it is an invalid segment it returns -1
@@ -74,7 +74,7 @@ func calculateFare(p1, p2 structs_and_constants.Point) float64 {
 		default:
 			return structs_and_constants.Idle_fare * dTime / hourToSecond
 	}
-}
+} // we test this with E2E tests
 
 /*
 Process gets Point one by one from ch channel and process them using calculateFare function
@@ -145,7 +145,7 @@ func Process(ch chan structs_and_constants.Point, _wg *sync.WaitGroup, done chan
 
 	wg.Wait()
 	close(done)
-}
+} // we test this with E2E tests
 
 /*
 writingToCSV creates the csv ouput file
@@ -188,4 +188,4 @@ func writingToCSV(ch chan structs_and_constants.Output_data, wg *sync.WaitGroup,
 		}
 	}
 	close(done)
-}
+} // we test this with E2E tests

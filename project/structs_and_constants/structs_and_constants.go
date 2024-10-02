@@ -29,9 +29,9 @@ type Output_data struct {
 }
 
 // ToSlice is a method for Output_data So we can convert it to []string for writing csv
-func (ot Output_data)ToSlice() []string {
+func (ot *Output_data)ToSlice() []string {
     ret := make([]string, 2)
     ret[0] = fmt.Sprintf("%d", ot.Id_delivery)
     ret[1] = fmt.Sprintf("%f", ot.Fare_estimate)
     return ret
-}
+} // we test it with unit test in structs_and_constants_test.go

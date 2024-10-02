@@ -17,7 +17,7 @@ func strToFloat64(s string) (float64, error) {
 		return 0, err
 	}
 	return floatValue, nil
-}
+} // we test this with unit test in main_test.go that test toPoint 
 
 // strToInt64 get a string and convert it to a int64 type and return error if it couldn't do it
 func strToInt64(s string) (int64, error) {
@@ -26,7 +26,7 @@ func strToInt64(s string) (int64, error) {
 		return 0, err
 	}
 	return intValue, nil
-}
+} // we test this with unit test in main_test.go that test toPoint
 
 // toPoint convert a []string to Point type and return an error if converting some string returns an error
 func toPoint(s []string) (structs_and_constants.Point, error) {
@@ -48,7 +48,7 @@ func toPoint(s []string) (structs_and_constants.Point, error) {
 					Lng: lng,
 					Timestamp: timestamp,
 				}, nil
-}
+} // we test this with unit test in main_test.go that test toPoint
 
 /*
 main opens the csv input file
@@ -117,4 +117,4 @@ func main() {
 	wg.Wait() // it will block until calculations.Process finish its job
 
 	fmt.Println("Successfully done!!!")
-}
+} // we test this with E2E tests
