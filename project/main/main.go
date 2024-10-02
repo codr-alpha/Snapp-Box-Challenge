@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"fmt"
 	"sync"
+	"time"
 )
 
 // strToFloat64 get a string and convert it to a float64 type and return error if it couldn't do it
@@ -52,13 +53,20 @@ func toPoint(s []string) (structs_and_constants.Point, error) {
 
 /*
 main opens the csv input file
+first you need to get the name of the file to it without .csv suffix
 reading it line by line
 and converts each line with toPoint function to a Point
 and sends it to a channel that another thread process it
 it uses sync.WaitGroup for making sure other thread finish its job before main thread
 */
 func main() {
-	file, err := os.Open("../../input/sample_data.csv")
+	start := time.Now()
+
+	var input_name string
+	fmt.Scanf("%s", &input_name)
+	input_address := fmt.Sprintf("../../input/%s.csv", input_name)
+
+	file, err := os.Open(input_address)
 	if err != nil {
 		fmt.Println("Can not open file!!!")
 		fmt.Println(err)
@@ -116,5 +124,6 @@ func main() {
 
 	wg.Wait() // it will block until calculations.Process finish its job
 
-	fmt.Println("Successfully done!!!")
+	elapsed := time.Since(start)
+	fmt.Printf("Successfully done in %v!!!\n", elapsed)
 } // we test this with E2E tests
