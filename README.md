@@ -19,3 +19,6 @@ we have 4 directories
 		main reads a string from terminal for example str and looks for the input/$str.csv to read from
 		in main we read from csv input file and parse each line to Point type and send it to a buffered channel where the Process in calculation get Points from this channel and if the id is different than the previous Point it replace it and if they are the same it calculates the fare between two Points and if the second Point is valid it replaces it and updates the fare of that id
 		in Process when we finish our job with a id we send our information of that id to a channel which writeToCSV function reads from it and writes it to our output file
+
+		i test the code with 4 Giga byte input csv file and it finished successfuly and take around 1 minute
+		and test it with 16 Giga byte input csv file and it finished successfuly and take around 4 minutes
