@@ -60,11 +60,11 @@ and sends it to a channel that another thread process it
 it uses sync.WaitGroup for making sure other thread finish its job before main thread
 */
 func main() {
-	start := time.Now()
-
 	var input_name string
 	fmt.Scanf("%s", &input_name)
 	input_address := fmt.Sprintf("../../input/%s.csv", input_name)
+
+	start := time.Now()
 
 	file, err := os.Open(input_address)
 	if err != nil {
